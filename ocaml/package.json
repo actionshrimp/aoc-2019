@@ -1,0 +1,25 @@
+{
+    "name": "aoc-2019",
+    "version": "0.0.0",
+    "description": "My Project",
+    "esy": {
+        "build": "dune build -p aoc2019"
+    },
+    "scripts": {
+        "run": "dune exec aoc2019"
+    },
+    "dependencies": {
+        "@opam/dune": ">=1.6.0",
+        "@esy-ocaml/reason": "*",
+        "ocaml": "^4.4.0",
+        "@opam/tablecloth-native": "*"
+    },
+    "devDependencies": {
+        "ocaml": "4.7.1004",
+        "refmterr": "*",
+        "@opam/merlin": "*"
+    },
+    "resolutions": {
+        "@opam/tablecloth-native": "darklang/tablecloth:tablecloth-native.opam#779135fb3abb3213dbfdd1ce730d4977a2f7161e"
+    }
+}
