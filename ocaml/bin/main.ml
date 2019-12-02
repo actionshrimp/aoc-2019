@@ -1,3 +1,5 @@
+module T = Tablecloth
+
 let print_day ~day ~part_1 ?part_2 () =
   print_endline (Printf.sprintf "Day %d" day) ;
   print_endline (Printf.sprintf "Part 1: %d" part_1) ;
@@ -57,29 +59,46 @@ module Day2 = struct
     else failwith (Printf.sprintf "unexpected opcode: %d" code)
 
 
-  let set_gravity_assist_memory memory =
-    memory.(1) <- 12 ;
-    memory.(2) <- 2
+  let set_gravity_assist_memory noun verb memory =
+    memory.(1) <- noun ;
+    memory.(2) <- verb
 
 
-  let part_1 () =
+  let init_memory =
     let input =
       Aoc2019.Util.fold_file_lines
         "../rust/input/2019/day2.txt"
         (fun _acc line -> line (* there's only one line in the file *))
         ""
     in
-    let memory =
-      Tablecloth.String.split ~on:"," input
-      |> Tablecloth.List.map ~f:int_of_string
-      |> Tablecloth.Array.from_list
-    in
-    set_gravity_assist_memory memory ;
+    T.String.split ~on:"," input |> T.List.map ~f:int_of_string
+
+
+  let try_pair noun verb =
+    let memory = init_memory |> T.Array.from_list in
+    set_gravity_assist_memory noun verb memory ;
     let memory' = run_intcode 0 memory in
     memory'.(0)
 
 
-  let run () = print_day ~day:2 ~part_1:(part_1 ()) ()
+  let part_1 () = try_pair 12 2
+
+  let part_2 () =
+    let noun = ref 0 in
+    let verb = ref 0 in
+    let _ =
+      while not (try_pair !noun !verb = 19690720) do
+        if !verb >= !noun
+        then (
+          noun := !noun + 1 ;
+          verb := 0 )
+        else verb := !verb + 1
+      done
+    in
+    (100 * !noun) + !verb
+
+
+  let run () = print_day ~day:2 ~part_1:(part_1 ()) ~part_2:(part_2 ()) ()
 end
 
 let () = Day2.run ()
