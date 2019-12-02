@@ -38,7 +38,6 @@ module Day2 = struct
     let code = memory.(pos) in
     if code == 1
     then (
-      print_endline "opcode 1" ;
       let loc_1 = memory.(pos + 1) in
       let loc_2 = memory.(pos + 2) in
       let result = memory.(loc_1) + memory.(loc_2) in
@@ -47,7 +46,6 @@ module Day2 = struct
       run_intcode (pos + 4) memory )
     else if code == 2
     then (
-      print_endline "opcode 2" ;
       let loc_1 = memory.(pos + 1) in
       let loc_2 = memory.(pos + 2) in
       let result = memory.(loc_1) * memory.(loc_2) in
@@ -55,9 +53,7 @@ module Day2 = struct
       memory.(out) <- result ;
       run_intcode (pos + 4) memory )
     else if code == 99
-    then
-      let _ = print_endline "opcode 99" in
-      memory
+    then memory
     else failwith (Printf.sprintf "unexpected opcode: %d" code)
 
 
