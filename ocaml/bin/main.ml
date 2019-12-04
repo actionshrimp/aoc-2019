@@ -271,4 +271,33 @@ module Day3 = struct
   let run () = print_day ~day:3 ~part_1:(part_1 ()) ~part_2:(part_2 ()) ()
 end
 
-let () = Day3.run ()
+module Day4 = struct
+  let rec check_increasing_and_pair (x_prev, found_pair) = function
+    | [] ->
+        found_pair
+    | x :: xs ->
+        let comp = Char.compare x x_prev in
+        if comp < 0
+        then false
+        else if comp = 0
+        then check_increasing_and_pair (x, true) xs
+        else check_increasing_and_pair (x, found_pair) xs
+
+
+  let meets_criteria n =
+    let s = string_of_int n |> T.String.to_list in
+    check_increasing_and_pair ('0', false) s
+
+
+  let part_1 () =
+    let found = ref 0 in
+    for x = 156218 to 652527 do
+      if meets_criteria x then found := !found + 1 else ()
+    done ;
+    !found
+
+
+  let run () = print_day ~day:4 ~part_1:(part_1 ()) ()
+end
+
+let () = Day4.run ()
