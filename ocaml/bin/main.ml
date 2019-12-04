@@ -121,59 +121,98 @@ module Day3 = struct
         (x, y + d)
 
 
+  type intersec_details =
+    { p : int * int
+    ; d : int
+    }
+
   let intersections init_as init_bs =
-    let rec run_intersections (a_x, a_y) (b_x, b_y) as_ bs =
+    let rec run_intersections a_total (a_x, a_y) b_total (b_x, b_y) as_ bs =
       match (as_, bs) with
       | [], _ ->
           []
-      | a :: other_as, [] ->
-          run_intersections (move (a_x, a_y) a) (0, 0) other_as init_bs
+      | (a_dir, a_d) :: other_as, [] ->
+          run_intersections
+            (a_total + a_d)
+            (move (a_x, a_y) (a_dir, a_d))
+            0
+            (0, 0)
+            other_as
+            init_bs
       | (a_dir, a_d) :: _other_as, (b_dir, b_d) :: other_bs ->
           let within dx d = dx > 0 && dx < d in
           let intersec =
             match (a_dir, b_dir) with
             | Up, Left when within (b_x - a_x) b_d && within (a_y - b_y) a_d ->
-                Some (a_x, b_y)
+                Some
+                  { p = (a_x, b_y)
+                  ; d = a_total + b_total + (b_x - a_x) + (a_y - b_y)
+                  }
             | Up, Right when within (a_x - b_x) b_d && within (a_y - b_y) a_d
               ->
-                Some (a_x, b_y)
+                Some
+                  { p = (a_x, b_y)
+                  ; d = a_total + b_total + (a_x - b_x) + (a_y - b_y)
+                  }
             | Down, Left when within (b_x - a_x) b_d && within (b_y - a_y) a_d
               ->
-                Some (a_x, b_y)
+                Some
+                  { p = (a_x, b_y)
+                  ; d = a_total + b_total + (b_x - a_x) + (b_y - a_y)
+                  }
             | Down, Right when within (a_x - b_x) b_d && within (b_y - a_y) a_d
               ->
-                Some (a_x, b_y)
+                Some
+                  { p = (a_x, b_y)
+                  ; d = a_total + b_total + (a_x - b_x) + (b_y - a_y)
+                  }
             | Left, Up when within (a_x - b_x) a_d && within (b_y - a_y) b_d ->
-                Some (b_x, a_y)
+                Some
+                  { p = (b_x, a_y)
+                  ; d = a_total + b_total + (a_x - b_x) + (b_y - a_y)
+                  }
             | Left, Down when within (a_x - b_x) a_d && within (a_y - b_y) b_d
               ->
-                Some (b_x, a_y)
+                Some
+                  { p = (b_x, a_y)
+                  ; d = a_total + b_total + (a_x - b_x) + (a_y - b_y)
+                  }
             | Right, Up when within (b_x - a_x) a_d && within (b_y - a_y) b_d
               ->
-                Some (b_x, a_y)
+                Some
+                  { p = (b_x, a_y)
+                  ; d = a_total + b_total + (b_x - a_x) + (b_y - a_y)
+                  }
             | Right, Down when within (b_x - a_x) a_d && within (a_y - b_y) b_d
               ->
-                Some (b_x, a_y)
+                Some
+                  { p = (b_x, a_y)
+                  ; d = a_total + b_total + (b_x - a_x) + (a_y - b_y)
+                  }
             | _ ->
                 None
           in
           T.Option.to_list intersec
           @ run_intersections
+              a_total
               (a_x, a_y)
+              (b_total + b_d)
               (move (b_x, b_y) (b_dir, b_d))
               as_
               other_bs
     in
-    run_intersections (0, 0) (0, 0) init_as init_bs
+    run_intersections 0 (0, 0) 0 (0, 0) init_as init_bs
 
 
-  let distance (x, y) = Pervasives.abs x + Pervasives.abs y
+  let distance_from_central_port { p = x, y; _ } =
+    Pervasives.abs x + Pervasives.abs y
+
 
   let example_1 () =
     intersections
       [ (Right, 8); (Up, 5); (Left, 5); (Down, 3) ]
       [ (Up, 7); (Right, 6); (Down, 4); (Left, 4) ]
-    |> T.List.map ~f:distance
+    |> T.List.map ~f:distance_from_central_port
     |> T.List.minimum
     |> T.Option.getExn
 
@@ -197,7 +236,7 @@ module Day3 = struct
                failwith "empty input")
 
 
-  let part_1 () =
+  let read_lines () =
     let lines =
       Aoc2019.Util.fold_file_lines
         "../rust/input/2019/day3.txt"
@@ -206,15 +245,30 @@ module Day3 = struct
     in
     match lines with
     | [ a; b ] ->
-        intersections a b
-        |> T.List.map ~f:distance
-        |> T.List.minimum
-        |> T.Option.getExn
+        (a, b)
     | _ ->
         failwith "wrong number of lines in input"
 
 
-  let run () = print_day ~day:3 ~part_1:(part_1 ()) ()
+  let part_1 () =
+    let a, b = read_lines () in
+    intersections a b
+    |> T.List.map ~f:distance_from_central_port
+    |> T.List.minimum
+    |> T.Option.getExn
+
+
+  let distance_travelled { d; _ } = d
+
+  let part_2 () =
+    let a, b = read_lines () in
+    intersections a b
+    |> T.List.map ~f:distance_travelled
+    |> T.List.minimum
+    |> T.Option.getExn
+
+
+  let run () = print_day ~day:3 ~part_1:(part_1 ()) ~part_2:(part_2 ()) ()
 end
 
 let () = Day3.run ()
