@@ -272,32 +272,59 @@ module Day3 = struct
 end
 
 module Day4 = struct
-  let rec check_increasing_and_pair (x_prev, found_pair) = function
-    | [] ->
-        found_pair
-    | x :: xs ->
-        let comp = Char.compare x x_prev in
-        if comp < 0
-        then false
-        else if comp = 0
-        then check_increasing_and_pair (x, true) xs
-        else check_increasing_and_pair (x, found_pair) xs
-
-
-  let meets_criteria n =
+  let meets_criteria_p1 n =
+    let rec check (x_prev, found_pair) = function
+      | [] ->
+          found_pair
+      | x :: xs ->
+          let comp = Char.compare x x_prev in
+          if comp < 0
+          then false
+          else if comp = 0
+          then check (x, true) xs
+          else check (x, found_pair) xs
+    in
     let s = string_of_int n |> T.String.to_list in
-    check_increasing_and_pair ('0', false) s
+    check ('0', false) s
 
 
   let part_1 () =
     let found = ref 0 in
     for x = 156218 to 652527 do
-      if meets_criteria x then found := !found + 1 else ()
+      if meets_criteria_p1 x then found := !found + 1 else ()
     done ;
     !found
 
 
-  let run () = print_day ~day:4 ~part_1:(part_1 ()) ()
+  let meets_criteria_p2 n =
+    let rec check (x_prev_2, x_prev_1, found_pair_prev, found_pair) = function
+      | [] ->
+          found_pair
+      | x :: xs ->
+          let comp_1 = Char.compare x x_prev_1 in
+          if comp_1 < 0
+          then false
+          else if comp_1 = 0
+          then
+            let comp_2 = Char.compare x x_prev_2 in
+            if comp_2 = 0
+            then check (x_prev_1, x, found_pair_prev, found_pair_prev) xs
+            else check (x_prev_1, x, found_pair_prev, true) xs
+          else check (x_prev_1, x, found_pair, found_pair) xs
+    in
+    let s = string_of_int n |> T.String.to_list in
+    check ('1', '0', false, false) s
+
+
+  let part_2 () =
+    let found = ref 0 in
+    for x = 156218 to 652527 do
+      if meets_criteria_p2 x then found := !found + 1 else ()
+    done ;
+    !found
+
+
+  let run () = print_day ~day:4 ~part_1:(part_1 ()) ~part_2:(part_2 ()) ()
 end
 
 let () = Day4.run ()
